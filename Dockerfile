@@ -1,7 +1,7 @@
 FROM python:3.8-slim-buster
 
-# Update and install AWS CLI
-RUN apt update -y && apt install awscli -y
+# Update package lists and install Git
+RUN apt-get update -y && apt-get install -y git
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -12,7 +12,7 @@ COPY . /app
 # Remove the text summarizer directory if it already exists (ensure clean clone)
 RUN rm -rf /app/src/text-summarizer-project
 
-# Optionally, clone the repository if needed
+# Clone the repository
 RUN git clone https://github.com/fulfilment01/Text-Summarizer-Project.git /app/src/text-summarizer-project
 
 # Install Python dependencies from requirements.txt without user input
