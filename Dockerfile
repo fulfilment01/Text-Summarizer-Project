@@ -1,32 +1,35 @@
+# Stage 1: Build Rust components
+FROM rust:latest AS builder
+
+# Set the working directory
+WORKDIR /app
+
+# Copy application code into the container
+COPY . .
+
+# Build the Rust application
+RUN cargo build --release
+
+# Stage 2: Set up Python environment
 FROM python:3.8-slim-buster
 
-# Update and install git, AWS CLI, and Rust
+# Install necessary system dependencies
 RUN apt-get update -y && \
-    apt-get install -y git awscli build-essential curl && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    export PATH="$HOME/.cargo/bin:$PATH" && \
+    apt-get install -y git build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy application files into the container
+# Copy the compiled Rust binary from the builder stage
+COPY --from=builder /app/target/release/your_rust_binary /app/
+
+# Copy Python application files into the container
 COPY . /app
 
-# Remove the text summarizer directory if it already exists (ensure clean clone)
-RUN rm -rf /app/src/text-summarizer-project
-
-# Clone the repository
-RUN git clone https://github.com/fulfilment01/Text-Summarizer-Project.git /app/src/text-summarizer-project
-
-# Install Python dependencies from requirements.txt without user input
+# Install Python dependencies
 RUN pip install --no-input -r requirements.txt
-
-# Upgrade accelerate and uninstall/reinstall specific packages if necessary
-RUN pip install --upgrade accelerate
-RUN pip uninstall -y transformers accelerate
-RUN pip install transformers accelerate
 
 # Set the default command to run your application
 CMD ["python3", "app.py"]
