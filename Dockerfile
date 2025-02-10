@@ -1,30 +1,28 @@
-FROM python:3.8-slim-buster
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim as base
 
-# Update and install git and AWS CLI
-RUN apt-get update -y && \
-    apt-get install -y git awscli && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100
 
-# Set the working directory inside the container
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy application files into the container
-COPY . /app
+# Copy the requirements file into the container
+COPY requirements.txt /app/
 
-# Remove the text summarizer directory if it already exists (ensure clean clone)
-RUN rm -rf /app/src/text-summarizer-project
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Clone the repository
-RUN git clone https://github.com/fulfilment01/Text-Summarizer-Project.git /app/src/text-summarizer-project
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies from requirements.txt without user input
-RUN pip install --no-input -r requirements.txt
+# Copy the rest of the application code into the container
+COPY . /app/
 
-# Upgrade accelerate and uninstall/reinstall specific packages if necessary
-RUN pip install --upgrade accelerate
-RUN pip uninstall -y transformers accelerate
-RUN pip install transformers accelerate
-
-# Set the default command to run your application
-CMD ["python3", "app.py"]
+# Set the entry point for the container
+CMD ["python", "app.py"]
