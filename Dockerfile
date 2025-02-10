@@ -1,18 +1,12 @@
 FROM python:3.8-slim-buster
 
-# Update and install git, AWS CLI, and dependencies for Rust
+# Update and install git, AWS CLI, and Rust
 RUN apt-get update -y && \
-    apt-get install -y \
-    git \
-    awscli \
-    build-essential \
-    curl \
-    && apt-get clean && \
+    apt-get install -y git awscli build-essential curl && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    export PATH="$HOME/.cargo/bin:$PATH" && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Install Rust and Cargo
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    export PATH="$HOME/.cargo/bin:$PATH"
 
 # Set the working directory inside the container
 WORKDIR /app
