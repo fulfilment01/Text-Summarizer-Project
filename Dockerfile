@@ -1,7 +1,10 @@
 FROM python:3.8-slim-buster
 
-# Update package lists and install Git
-RUN apt-get update -y && apt-get install -y git
+# Update and install git and AWS CLI
+RUN apt-get update -y && \
+    apt-get install -y git awscli && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
 WORKDIR /app
