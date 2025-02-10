@@ -1,6 +1,6 @@
 FROM python:3.8-slim-buster
 
-# Update and install git, AWS CLI, and dependencies for Rust installation
+# Update and install git, AWS CLI, and dependencies for Rust
 RUN apt-get update -y && \
     apt-get install -y \
     git \
@@ -12,8 +12,7 @@ RUN apt-get update -y && \
 
 # Install Rust and Cargo
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    export PATH="$HOME/.cargo/bin:$PATH" && \
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+    export PATH="$HOME/.cargo/bin:$PATH"
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -37,4 +36,3 @@ RUN pip install transformers accelerate
 
 # Set the default command to run your application
 CMD ["python3", "app.py"]
-
